@@ -1,0 +1,687 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html charset=utf-8;" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="device=device-width" />
+
+<link rel="stylesheet" href="jqwidgets/styles/jqx.base.css"
+	type="text/css" />
+<link rel="stylesheet" href="styles/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" href="styles/select2.css" type="text/css" />
+<link rel="stylesheet" href="styles/select2-bootstrap.css" type="text/css" />
+<script src="scripts/jquery-1.11.1.min.js"></script>
+<script src="scripts/bootstrap.min.js"></script>
+<script src="scripts/select2.full.js"></script>
+
+<script type="text/javascript" src="jqwidgets/jqxcore.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxdata.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxbuttons.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxscrollbar.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxmenu.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxlistbox.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxdropdownlist.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxgrid.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxgrid.selection.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxgrid.columnsresize.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxgrid.filter.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxgrid.sort.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxgrid.pager.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxgrid.edit.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxnumberinput.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxcombobox.js"></script>
+
+<style>
+.gray {
+	color: black !important;
+	background-color: rgb(235, 235, 228) !important;
+}
+</style>
+
+<script type="text/javascript">
+	$(document)
+			.ready(
+					function() {
+						$(".select2-single").select2({
+			                theme: "bootstrap",
+			                width: null,
+			                containerCssClass: ':all:'
+			            });
+						// $("#jqxgrid").jqxGrid({ disabled: true});    //Set disabled
+						//var disabled = $("#jqxgrid").jqxGrid('disabled'); //Get disabled			
+						//$("#console").append(disabled.toString());
+
+						//$("#jqxgrid").jqxGrid('selectrow', 1); //Select Row
+
+						//$("#jqxgrid").on('rowselect', function (event) {     //Event When row being select
+						//	var rowindex = event.args.rowindex;
+						//	$("#console").append("rowindex is :" + rowindex);
+						//});
+						$("#btn_callLocalJson")
+								.click(
+										function() {
+											var filtergroup = new $.jqx.filter();
+
+											var pagerrenderer = function() {
+												var element = $("<div class='text-center' style='margin-top: 5px; width: 100%; height: 100%;'></div>");
+												var paginginfo = $("#jqxgrid")
+														.jqxGrid(
+																'getpaginginformation');
+												for (i = 0; i < paginginfo.pagescount; i++) {
+													// add anchor tag with the page number for each page.
+													var anchor = $("<a style='padding: 5px;' href='#" + i + "'>"
+															+ i + "</a>");
+													anchor.appendTo(element);
+													anchor
+															.click(function(
+																	event) {
+																// go to a page.
+																var pagenum = parseInt($(
+																		event.target)
+																		.text());
+																$("#jqxgrid")
+																		.jqxGrid(
+																				'gotopage',
+																				pagenum);
+															});
+												}
+												return element;
+											}
+
+											var url = "beverages.txt";
+											// prepare the data
+											var source = {
+												datatype : "json",
+												datafields : [ {
+													name : 'name'
+												}, {
+													name : 'type'
+												}, {
+													name : 'calories'
+												}, {
+													name : 'totalfat'
+												}, {
+													name : 'protein'
+												}, ],
+												id : 'id',
+												url : url,
+
+												//pagenum:1,
+												pagesize : 15,
+												pager : function(pagenum,
+														pagesize, oldpagenum) {
+
+													$("#console").append(
+															pagenum, pagesize,
+															oldpagenum);
+													// callback called when a page or page size is changed.
+												},
+
+												addrow : function(rowid,
+														rowdata, position,
+														commit) {
+													// synchronize with the server - send insert command
+													// call commit with parameter true if the synchronization with the server is successful 
+													//and with parameter false if the synchronization failed.
+													commit(true);
+												}
+
+											};
+
+											var cellsrenderer = function(row,
+													columnfield, value,
+													defaulthtml,
+													columnproperties) {
+												if (value < 200) {
+													return '<span style="margin: 4px; float: ' + columnproperties.cellsalign + '; color: #0000ff;">'
+															+ value + '</span>';
+												} else {
+													return '<span style="margin: 4px; float: ' + columnproperties.cellsalign + '; color: #008000;">'
+															+ value + '</span>';
+												}
+											}
+
+											var cellclass_noEdit = function(
+													row, columnfield, value) {
+												//if (value < 3) {
+												//	return 'red';
+												//} else if (value >= 3 && value < 8) {
+												//	return 'yellow';
+												//} else return 'green';
+												return 'gray';
+											};
+
+											var columnrenderer_NotNull = function(
+													value) {
+												return '<div class="text-center text-primary" style="margin-top: 5px;">卡路里'
+														+ value + '</div>';
+											}
+
+											var columnrenderer_Pkey = function(
+													value) {
+												return '<div class="text-center text-danger" style="margin-top: 5px;">*名稱'
+														+ value + '</div>';
+											}
+
+											var dataAdapter = new $.jqx.dataAdapter(
+													source,
+													{
+														downloadComplete : function(
+																data, status,
+																xhr) {
+														},
+														loadComplete : function(
+																data) {
+														},
+														loadError : function(
+																xhr, status,
+																error) {
+														}
+													});
+											$("#jqxgrid")
+													.jqxGrid(
+															{
+																width : 800,
+																source : dataAdapter,
+																sortable : true,
+																pageable : true,
+																autoheight : true,
+																editable : true,
+																selectionmode : 'singlecell',
+																pagerrenderer : pagerrenderer,
+																ready : function() {
+																	$(
+																			"#jqxgrid")
+																			.jqxGrid(
+																					'removesort');
+																	//$("#jqxgrid").jqxGrid('hidecolumn', 'name');
+																	//$("#jqxgrid").jqxGrid('addfilter', 'type', filtergroup);
+																	//$("#jqxgrid").jqxGrid('applyfilters');
+
+																	$(
+																			"#jqxgrid")
+																			.on(
+																					'cellselect',
+																					function(
+																							event) {
+																						var datafield = event.args.datafield;
+																						var row = event.args.rowindex;
+
+																						var columntext = $(
+																								"#jqxgrid")
+																								.jqxGrid(
+																										'getcolumn',
+																										event.args.datafield).text;
+																						$(
+																								"#console")
+																								.val(
+																										function(
+																												i,
+																												text) {
+																											return text
+																													+ "[--cellselect--]  datafield:"
+																													+ datafield
+																													+ "   row: "
+																													+ row
+																													+ "    columntext: "
+																													+ columntext
+																													+ "\n";
+																										});
+																					});
+
+																	$(
+																			"#jqxgrid")
+																			.on(
+																					'cellunselect',
+																					function(
+																							event) {
+																						var datafield = event.args.datafield;
+																						var row = event.args.rowindex;
+																						var columntext = $(
+																								"#jqxgrid")
+																								.jqxGrid(
+																										'getcolumn',
+																										event.args.datafield).text;
+																						$(
+																								"#console")
+																								.val(
+																										function(
+																												i,
+																												text) {
+																											return text
+																													+ "[--cellunselect--]  datafield: "
+																													+ datafield
+																													+ "    row: "
+																													+ row
+																													+ "    columntext: "
+																													+ columntext
+																													+ "\n";
+																										});
+																					});
+
+																},
+																columns : [
+																		{
+																			text : 'Name',
+																			datafield : 'name',
+																			width : 250,
+																			sortable : false,
+																			renderer : columnrenderer_Pkey,
+																			editable : false,
+																			cellclassname : cellclass_noEdit
+																		},
+																		{
+																			text : 'Beverage Type',
+																			datafield : 'type',
+																			width : 250
+																		},
+																		{
+																			text : 'Calories',
+																			datafield : 'calories',
+																			width : 180,
+																			cellsrenderer : cellsrenderer,
+																			renderer : columnrenderer_NotNull,
+																			columntype : 'numberinput',
+																			initeditor : function(
+																					row,
+																					cellvalue,
+																					editor) {
+																				editor
+																						.jqxNumberInput({
+																							digits : 10
+																						});
+																			},
+																			validation : function(
+																					cell,
+																					value) {
+																				if (value > 1000) {
+																					return {
+																						result : false,
+																						message : "不可大於1000"
+																					};
+																				}
+																				if (value < 0) {
+																					return {
+																						result : false,
+																						message : "不可小於0"
+																					};
+																				}
+																				return true;
+																			}
+																		},
+																		{
+																			text : 'Total Fat',
+																			datafield : 'totalfat',
+																			width : 120
+																		},
+																		{
+																			text : 'Protein',
+																			datafield : 'protein',
+																			width : 120
+																		} ]
+															});
+										});
+
+						$("#btn_clear_console").click(function() {
+							$("#console").val("");
+						});
+
+						$("#btn_clear_Json").click(function() {
+							$("#JsonTextArea").val("");
+						});
+						$("#btn_toJson")
+								.click(
+										function() {
+
+											var rows = $('#jqxgrid').jqxGrid(
+													'getrows');
+											var arr = new Array();
+
+											for (i = 0; i < rows.length; i++) {
+												arr[i] = $("#jqxgrid").jqxGrid(
+														'getrowdata', i);
+											}
+
+											var rowhtml = "[";
+											var myJSON;
+											arr
+													.forEach(function(item) {
+														var jsondata = {};
+														jsondata['name'] = item.name;
+														jsondata['type'] = item.type;
+														jsondata['calories'] = item.calories;
+														jsondata['totalfat'] = item.totalfat;
+														jsondata['protein'] = item.protein;
+														rowhtml += JSON
+																.stringify(jsondata)
+																+ "\n";
+													});
+											$("#JsonTextArea").val(
+													rowhtml + "]");
+
+											$("#jqxgrid").jqxGrid('exportdata',
+													'json', 'jqxGrid', true,
+													arr);
+										});
+
+						$("#btn_callWebAPI")
+								.click(
+										function() {
+
+											var sourceDB = {
+												datatype : "json",
+												datafields : [ {
+													name : 'zone',
+													type : 'string'
+												}, {
+													name : 'zone_name',
+													type : 'string'
+												}, {
+													name : 'clinic_flag',
+													type : 'string'
+												}, {
+													name : 'hospsid',
+													type : 'string'
+												}, {
+													name : 'ip_address',
+													type : 'string'
+												} ],
+												hierarchy : {
+													root : 'resultSet'
+												},
+												type : 'POST',
+												data : {
+													serviceName : 'PatinpService',
+													parameters : '{"idNo":"ORCL","sessionID":1806,"method":"getPatinpListInp"}'
+												},
+												url : 'http://172.16.2.189:8080/SHSTimaServices/servlets/ServletAgent',
+												async : false
+											};
+
+											//http://172.16.2.189:8080/SHSTimaServices/servlets/ServletAgent?serviceName=PatinpService&parameters={"idNo":"ORCL","sessionID":1806,"method":"getPatinpListInp"}
+
+											var dataAdapter = new $.jqx.dataAdapter(
+													sourceDB);
+
+											// 					$.ajax({
+											// 	 					type: 'POST',
+											// 	 					dataType: 'json',
+											// 	 					data:{ serviceName:'ZoneSetService',parameters:'{"idNo":"ORCL","sessionID":1806,"method":"getZonSet"}'},
+											// 	 					url: 'http://172.16.2.189:8080/SHSTimaServices/servlets/ServletAgent',				
+											// 	 					success: function (data) {	 							 						
+											// 	 						sourceDB.localdata = JSON.stringify(data);	 
+
+											// 	 						var dataAdapter = new $.jqx.dataAdapter(sourceDB, {
+											// 	 							downloadComplete: function (data, status, xhr) {
+
+											// 	 							},
+											// 	 							loadComplete: function (data) {
+											// 	 								//alert("OK2");
+											// 	 							},
+											// 	 							loadError: function (xhr, status, error) {
+											// 	 								//alert("NO");
+											// 	 							}
+											// 	 						});
+
+											// 	 						$("#jqxgrid2").jqxGrid({
+											// 								width: 900,
+											// 								autoheight: true,
+											// 								source: dataAdapter,
+											// 								columns: [{
+											// 									text: 'zone',
+											// 									datafield: 'zone',
+											// 									width: 100
+											// 								}, {
+											// 									text: 'zone_name',
+											// 									datafield: 'zone_name',
+											// 									width: 100
+											// 								}, {
+											// 									text: 'clinic_flag',
+											// 									datafield: 'clinic_flag',
+											// 									width: 180
+											// 								}, {
+											// 									text: 'hospsid',
+											// 									datafield: 'hospsid',
+											// 									width: 180
+											// 								}, {
+											// 									text: 'ip_address',
+											// 									datafield: 'ip_address',
+											// 									width: 180
+											// 								}]
+											// 							});
+											// 	 						},
+											// 	 					error: function (data) {
+											// 	 						alert("bad");}
+											// 					});
+											$("#jqxgrid").jqxGrid({
+												width : 900,
+												autoheight : true,
+												source : dataAdapter,
+												columns : [ {
+													text : 'zone',
+													datafield : 'zone',
+													width : 100
+												}, {
+													text : 'zone_name',
+													datafield : 'zone_name',
+													width : 100
+												}, {
+													text : 'clinic_flag',
+													datafield : 'clinic_flag',
+													width : 180
+												}, {
+													text : 'hospsid',
+													datafield : 'hospsid',
+													width : 180
+												}, {
+													text : 'ip_address',
+													datafield : 'ip_address',
+													width : 180
+												} ]
+											});
+
+										});
+
+						$("#btn_callWebAPI2").click(function() {
+							$("#console").val("Bad");
+						});
+						
+						var ComboBoxServerSource = [
+					                    "PatinpService",
+					                    "ZoneSetService",
+					                 ];
+
+					                // Create a jqxComboBox
+					    $("#jqxComboBox").jqxComboBox({ source: ComboBoxServerSource, width: '200', height: '25' });
+					                
+					    var ComboBoxMethodSource = [
+								                    "getZonSet",
+								                    "getPatinpListInp",
+								                 ];
+
+								                // Create a jqxComboBox
+						$("#jqxComboBox2").jqxComboBox({ source: ComboBoxMethodSource,width: '400', height: '25'});            
+					    
+								                
+						$("#jqxComboBox2").change(function() {
+							  alert( $( this ).val() );
+							});				                
+								                
+
+					});
+</script>
+</head>
+
+<body>
+
+	<div class="container">
+
+		<div class="navbar navbar-inverse">
+			<div class="navbar-header">
+				<button class="navbar-toggle" data-toggle="collapse"
+					data-target=".navbar-collapse">
+					<span class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a href="Navbar.html" class="navbar-brand">JQwidgets Demo</a>
+			</div>
+
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<!--
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact Us</a></li>
+				-->
+				</ul>
+				<form class="navbar-form navbar-right" target="_blank" method="get"
+					action="https://www.google.com.tw/search">
+					<div class="form-group">
+						<input id="Google" type="text" name="q" class="form-control"
+							placeholder="Please Input Something...." /> <input id="Submit1"
+							type="submit" value="Search" class="btn btn-primary" />
+					</div>
+				</form>
+
+			</div>
+
+		</div>
+		
+			<div id="jqxgrid"></div>
+
+			<div class="form-group">
+				<button type="button" class="btn btn-success" id="btn_toJson">轉
+					Json</button>
+			</div>
+
+			<div class="row">
+			<div class="form-group">
+				<div class="col-sm-4">
+                    <div class="input-group">
+                        <div class="input-group-addon">Server</div>
+                    	<div id='jqxComboBox'></div>
+					</div>
+				</div>	
+				<div class="col-sm-8">
+                    <div class="input-group">
+                        <div class="input-group-addon">Method</div>
+                    	<div id='jqxComboBox2'></div>
+					</div>
+				</div>										
+			</div>
+			</div>
+			<br />
+			<div class="form-group">
+				<button type="button" class="btn btn-info" id="btn_callLocalJson">本地檔案
+				</button>
+				<button type="button" class="btn btn-success" id="btn_callWebAPI">call
+					API</button>
+				<button type="button" class="btn btn-warning" id="btn_callWebAPI2">call
+					API2</button>
+			</div>
+			
+		
+
+		<div class="panel-group" id="accordion">
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<a data-toggle="collapse" data-parent="#accordion"
+						href="#collapse1">
+						<h4 class="panel-title">Console</h4>
+					</a>
+				</div>
+
+				<div id="collapse1" class="panel-collapse collapse">
+					<div class="panel-body">
+						<textarea id="console" class="form-control" rows="8"
+							placeholder="console...."></textarea>
+						<br />
+						<button type="button" class="pull-right btn btn-success"
+							id="btn_clear_console">Clear Console</button>
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<a data-toggle="collapse" data-parent="#accordion"
+						href="#collapse2">
+						<h4 class="panel-title">Json</h4>
+					</a>
+				</div>
+
+				<div id="collapse2" class="panel-collapse collapse">
+					<div class="panel-body">
+						<textarea id="JsonTextArea" class="form-control" rows="8"
+							placeholder="json...."></textarea>
+						<br />
+						<button type="button" class="pull-right btn btn-success"
+							id="btn_clear_Json">Clear Json</button>
+
+
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<a data-toggle="collapse" data-parent="#accordion"
+						href="#collapse3">
+						<h4 class="panel-title">Data getFromBackSide</h4>
+					</a>
+				</div>
+
+				<div id="collapse3" class="panel-collapse collapse">
+					<div class="panel-body">
+						<h4>設定 disabled</h4>
+						<code> $("#jqxgrid").jqxGrid({ disabled: true});</code>
+						<br />
+						<h4>取得 disabled</h4>
+						<code> var disabled = $("#jqxgrid").jqxGrid('disabled');</code>
+						<br />
+						<h4>選擇 Row</h4>
+						<code> $("#jqxgrid").jqxGrid('selectrow', 1); </code>
+						<br />
+
+						<h4>選擇 Row之後觸發</h4>
+						<code>$("#jqxgrid").on('rowselect', function (event) { </code>
+						<br />
+						<code> var rowindex = event.args.rowindex;</code>
+						<br />
+						<code>});</code>
+						<br />
+
+						<h4>排序Sorting</h4>
+						<code>$("#jqxgrid").bind('bindingcomplete', function() </code>
+						<br />
+						<code> { </code>
+						<br />
+						<code> $("#jqxgrid").jqxGrid('sortby', 'ShipName', 'asc');
+							//參數2:欄位名稱 參數3:排序方法 </code>
+						<br />
+						<code> });</code>
+						<br />
+						<code>$("#jqxgrid").jqxGrid('removesort');</code>
+						<br />
+
+						<code>$("#jqxgrid").bind("sort", function (event) { </code>
+						<br />
+						<code> var sortinformation = event.args.sortinformation; </code>
+						<br />
+						<code> var sortdirection = sortinformation.sortdirection; </code>
+						<br />
+						<code> var sortcolumn = sortinformation.sortcolumn; </code>
+						<br />
+						<code>}); </code>
+						<br />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		
+	</script>
+</body>
+
+</html>

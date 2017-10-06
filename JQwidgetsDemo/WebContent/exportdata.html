@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+
+
+    <title>exportdata !!</title>
+    <link rel="stylesheet" href="jqwidgets/styles/jqx.base.css" type="text/css" />
+    <script type="text/javascript" src="scripts/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxcore.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxdata.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxdata.export.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxbuttons.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxscrollbar.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxcheckbox.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxmenu.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxgrid.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxgrid.edit.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxgrid.selection.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxgrid.columnsresize.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxgrid.export.js"></script>
+    <script type="text/javascript" src="jqwidgets/jqxpopover.js"></script>
+    <script type="text/javascript" src="scripts/demos.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //var data = [{ "empName": "test", "age": "67", "department": { "id": "1234", "name": "Sales" }, "author": "ravi" }];
+
+            var url = "exportdatajson.json";
+
+
+            // myItems.forEach(function(item){
+            //     Response.write(item.firstname);
+            // });
+
+            //var data = generatedata(200);
+            var source = {
+                //localdata: data,
+                datatype: "json",
+                datafields: [{
+                    name: 'firstname',
+                    type: 'string'
+                }, {
+                    name: 'lastname',
+                    type: 'string'
+                }, {
+                    name: 'productname',
+                    type: 'string'
+                }, {
+                    name: 'available',
+                    type: 'bool'
+                }, {
+                    name: 'quantity',
+                    type: 'number'
+                }, {
+                    name: 'price',
+                    type: 'number'
+                }],
+                id:'id',
+                url:url,
+
+                updaterow: function (rowid, rowdata) {
+                    // synchronize with the server - send update command   
+                }
+            };
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+            // initialize jqxGrid
+            $("#jqxgrid").jqxGrid({
+                width: 800,
+                source: dataAdapter,
+                theme: 'energyblue',
+                editable: true,
+                selectionmode: 'singlecell',
+                columns: [{
+                    text: 'First Name',
+                    columntype: 'textbox',
+                    datafield: 'firstname',
+                    width: 90
+                }, {
+                    text: 'Last Name',
+                    datafield: 'lastname',
+                    columntype: 'textbox',
+                    width: 90
+                }, {
+                    text: 'Product',
+                    datafield: 'productname',
+                    width: 170,
+
+                }, {
+                    text: 'In Stock',
+                    datafield: 'available',
+                    columntype: 'checkbox',
+                    width: 125,
+
+                }, {
+                    text: 'Quantity',
+                    datafield: 'quantity',
+                    width: 85,
+                    cellsalign: 'right',
+                    cellsformat: 'n2',
+                    aggregates: ['min', 'max'],
+
+                }, {
+                    text: 'Price',
+                    datafield: 'price',
+                    cellsalign: 'right',
+                    cellsformat: 'c2',
+                    width: 100
+                }]
+            });
+            $("#excelExport").jqxButton({
+                theme: 'energyblue'
+            });
+            $("#xmlExport").jqxButton({
+                theme: 'energyblue'
+            });
+            $("#csvExport").jqxButton({
+                theme: 'energyblue'
+            });
+            $("#tsvExport").jqxButton({
+                theme: 'energyblue'
+            });
+            $("#htmlExport").jqxButton({
+                theme: 'energyblue'
+            });
+            $("#jsonExport").jqxButton({
+                theme: 'energyblue'
+            });
+            $("#excelExport").click(function () {
+                $("#jqxgrid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+            });
+            $("#xmlExport").click(function () {
+                $("#jqxgrid").jqxGrid('exportdata', 'xml', 'jqxGrid');
+            });
+            $("#csvExport").click(function () {
+                $("#jqxgrid").jqxGrid('exportdata', 'csv', 'jqxGrid');
+            });
+            $("#tsvExport").click(function () {
+                $("#jqxgrid").jqxGrid('exportdata', 'tsv', 'jqxGrid');
+            });
+            $("#htmlExport").click(function () {
+                $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid');
+            });
+            $("#jsonExport").click(function () {
+
+
+                var rows = $('#jqxgrid').jqxGrid('getrows');
+                var arr = new Array();
+
+                for (i = 0; i < rows.length; i++) {
+                    if ($("#jqxgrid").jqxGrid('getrowdata', i).firstname == "")
+                        continue;
+                    arr[i] = $("#jqxgrid").jqxGrid('getrowdata', i);
+                }
+
+                var rowhtml = "<b>Start</b><br/>";
+                var myJSON;
+                arr.forEach(function (item) {
+                    var jsondata = {};
+                    jsondata['firstname'] = item.firstname;
+                    jsondata['lastname'] = item.lastname;
+                    jsondata['available'] = item.available;
+                    jsondata['quantity'] = item.quantity;
+                    jsondata['price'] = item.price;
+                    rowhtml += "<b>" + JSON.stringify(jsondata) + "</b><br/>";
+                });
+                rowhtml += "<b>End</b><br/>";
+
+                $("#debugla").html(rowhtml);
+
+                $("#jqxgrid").jqxGrid('exportdata', 'json', 'jqxGrid', true, arr);
+            });
+
+        });
+    </script>
+</head>
+
+<body class='default'>
+    <div id='debugla'></div>
+    <div id='jqxWidget'>
+        <div id="jqxgrid"></div>
+        <div style='margin-top: 20px;'>
+            <div style='float: left;'>
+                <input type="button" value="Export to Excel" id='excelExport' />
+                <br />
+                <br />
+                <input type="button" value="Export to XML" id='xmlExport' />
+            </div>
+            <div style='margin-left: 10px; float: left;'>
+                <input type="button" value="Export to CSV" id='csvExport' />
+                <br />
+                <br />
+                <input type="button" value="Export to TSV" id='tsvExport' />
+            </div>
+            <div style='margin-left: 10px; float: left;'>
+                <input type="button" value="Export to HTML" id='htmlExport' />
+                <br />
+                <br />
+                <input type="button" value="Export to JSON" id='jsonExport' />
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
