@@ -39,6 +39,9 @@
 <script type="text/javascript" src="jqwidgets/jqxcombobox.js"></script>
 <script type="text/javascript" src="jqwidgets/jqxwindow.js"></script>
 <script type="text/javascript" src="jqwidgets/jqxpanel.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxcalendar.js"></script>
+<script type="text/javascript" src="jqwidgets/jqxdatetimeinput.js"></script>
+<script src="scripts/local_TW.js"></script>
 
 <script type="text/javascript">
 	$(document).ready(function() {		
@@ -136,32 +139,64 @@
 				autoheight : true, //高度
 				pageable : true, //是否分頁
 				columnsresize: true,	//欄位可否調整
+				sortable: true, //可否排序
 				filterable: true,	//可否過濾
 				showfilterrow: true, //顯示過濾Row
 				editable: true, //可否編輯
 				editmode: 'click', //編輯模式
-				selectionmode: 'singlerow', //選擇模式
+				selectionmode: 'multiplecellsadvanced', //選擇模式
 				enabletooltips: true, //顯示tooltip
+				keyboardnavigation:true,
 				//pagerrenderer : pagerrenderer, //載入自訂分頁樣式
-				pagermode: 'simple', //分業模式
+				//pagermode: 'simple', //分頁模式
 				altrows: true, //單數行變色
 				showtoolbar: true, //顯示工具列 (表格上方)
+				localization: getLocalization(), //多國語系檔
 				rendertoolbar: function (statusbar) {   //工具列長相
                     // appends buttons to the status bar.
                     var container = $("<div class= 'pull-right' style='overflow: hidden; position: relative; margin: 2px;'></div>");
+                    var jsonButton = $("<div style='float: left; margin-left: 5px;'><span style='margin-left: 4px; position: relative; top: 0px;'>json</span></div>");
                     var addButton = $("<div style='float: left; margin-left: 5px;'><span style='margin-left: 4px; position: relative; top: 0px;'>新增</span></div>");
                     var deleteButton = $("<div style='float: left; margin-left: 5px;'><span style='margin-left: 4px; position: relative; top: 0px;'>刪除</span></div>");
                     var reloadButton = $("<div style='float: left; margin-left: 5px;'><span style='margin-left: 4px; position: relative; top: 0px;'>重整</span></div>");
                     //var searchButton = $("<div style='float: left; margin-left: 5px;'><img style='position: relative; margin-top: 2px;' src='../../images/search.png'/><span style='margin-left: 4px; position: relative; top: -3px;'>Find</span></div>");
+                    container.append(jsonButton);
                     container.append(addButton);
                     container.append(deleteButton);
                     container.append(reloadButton);
                     //container.append(searchButton);
                     statusbar.append(container);
+                    jsonButton.jqxButton({  width: 60, height: 20 });
                     addButton.jqxButton({  width: 60, height: 20 });
                     deleteButton.jqxButton({  width: 65, height: 20 });
                     reloadButton.jqxButton({  width: 65, height: 20 });
                     //searchButton.jqxButton({  width: 50, height: 20 });
+                    
+                    jsonButton.click(function (event) {
+                        //var datarow = generatedata(1);
+                    	var rows = $("#jqxgrid" + window_no).jqxGrid('getrows');
+						var arr = new Array();
+
+						for (i = 0; i < rows.length; i++) {
+							arr[i] = $("#jqxgrid" + window_no).jqxGrid('getrowdata', i);
+						}
+
+							var rowhtml = "[";
+							var myJSON;
+							arr.forEach(function(item) {
+								var jsondata = {};
+								jsondata['chart_no'] = item.chart_no;
+								jsondata['type_name'] = item.type_name;
+								jsondata['sex'] = item.sex;
+								jsondata['dept_name'] = item.dept_name;
+								jsondata['div_name'] = item.div_name;
+								rowhtml += JSON.stringify(jsondata)+ "\n";
+							});
+							alert(rowhtml + "]");
+                    	});
+		
+						//$("#jqxgrid").jqxGrid('exportdata','json', 'jqxGrid', true,arr);
+                    
                     // add new row.
                     addButton.click(function (event) {
                         //var datarow = generatedata(1);
@@ -189,19 +224,56 @@
                 {
                     var key = event.charCode ? event.charCode : event.keyCode ? event.keyCode : 0;
                     if (key == 13) {
-                    	
                         //alert('Pressed Enter Key.');
-                        //return true;
+                    	 return event.keyCode = 9;
                     }
                     else if (key == 27) {
-                        alert('Pressed Esc Key.');
-                        return true;
+                        //alert('Pressed Esc Key.');
+                       
                     }
                 },
 				source : dataAdapter, //*重要*  資料來源
 				columns : getDataColumns($("#select2_Method").val()), // *重要* 欄位長相
 				ready : function() { //回調函數 (最後執行)
-					$("#jqxgrid" + window_no).jqxGrid('autoresizecolumns');
+					//$("#jqxgrid" + window_no).jqxGrid('autoresizecolumns');
+					$("#jqxgrid" + window_no).on('cellbeginedit', function (event) {
+					    var args = event.args;
+						//alert(args.datafield);
+						
+						
+						 // Select row - Grid Core
+			            $("#jqxgrid" + window_no).jqxGrid('selectrow', args.rowindex);
+
+			            var selectedRows = $("#jqxgrid" + window_no).jqxGrid('getselectedrowindexes');
+
+			            // Select rows - UI
+// 			            _.each(selectedRows, function(value) {
+
+// 			            	$("#jqxgrid" + window_no).find('#row' + value + 'table-widget').find('.jqx-grid-cell').addClass('jqx-grid-cell-selected jqx-fill-state-pressed');
+
+// 			            });
+						
+					    if ( args.datafield == "Selected" ) {
+					        if ( args.value == true ) {
+					        	
+					            // Select row - Grid Core
+					            $("#jqxgrid" + window_no).jqxGrid('selectrow', args.rowindex);
+
+					            var selectedRows = $("#jqxgrid" + window_no).jqxGrid('getselectedrowindexes');
+
+					            // Select rows - UI
+// 					            _.each(selectedRows, function(value) {
+
+// 					            	$("#jqxgrid" + window_no).find('#row' + value + 'table-widget').find('.jqx-grid-cell').addClass('jqx-grid-cell-selected jqx-fill-state-pressed');
+
+// 					            });
+
+					        } else {
+					            // Nothing for the moment
+					        }
+					    }
+
+					});
 				}
 			});    
         }
